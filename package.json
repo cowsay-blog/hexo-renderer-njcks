@@ -1,0 +1,22 @@
+{
+  "name": "hexo-renderer-nunjucks-extra",
+  "version": "1.0.0",
+  "description": "Nunjucks renderer for Hexo with extra utilities like customizing filters, etc.",
+  "main": "index.js",
+  "scripts": {
+    "commit": "gitmoji -c",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hexo",
+    "nunjucks"
+  ],
+  "author": "MomoCow",
+  "license": "MIT",
+  "dependencies": {
+    "nunjucks": "^3.1.6"
+  },
+  "devDependencies": {
+    "gitmoji-cli": "^1.9.2"
+  }
+}
