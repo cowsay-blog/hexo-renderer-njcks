@@ -1,3 +1,4 @@
+const { name } = require('./package.json')
 const nunjucks = require('nunjucks')
 const path = require('path')
 
@@ -12,7 +13,8 @@ const builtInFilters = [
   require('./filters/cast-array'),
   require('./filters/base-url'),
   require('./filters/prop'),
-  require('./filters/typeOf')
+  require('./filters/typeOf'),
+  require('./filters/xmlattr')
 ]
   .map(filter => ({
     name: toSnakeCase(filter.name),
@@ -20,7 +22,7 @@ const builtInFilters = [
     async: filter.async
   }))
 
-hexo.log.info('[nunjucks-extra] Filters: %s', builtInFilters.map(filter => filter.name).join(', '))
+hexo.log.info('[%s] %d filters loaded', name, builtInFilters.length)
 
 function toSnakeCase (str = '') {
   return str.replace(/[A-Z]/g, (matched) => '_' + matched.toLowerCase())
@@ -35,18 +37,23 @@ function njkCompile (data) {
   const env = nunjucks.configure(templateDir, CONFIG)
   builtInFilters.forEach(filter => installFilters(env, filter))
   const njkTemplate = nunjucks.compile(data.text, env)
-  return function renderer (locals, cb) {
-    return njkTemplate.render(locals, cb)
+  return function renderer (locals) {
+    try {
+      return njkTemplate.render(locals)
+    } catch (e) {
+      hexo.log.error(e)
+    }
+    return ''
   }
 }
 
-function njkRenderer (data, locals, cb) {
-  return njkCompile(data)(locals, cb)
+function njkRenderer (data, locals) {
+  return njkCompile(data)(locals)
 }
 
 njkRenderer.compile = njkCompile
 
 /* global hexo */
-hexo.extend.renderer.register('j2', 'html', njkRenderer, false)
-hexo.extend.renderer.register('njk', 'html', njkRenderer, false)
-hexo.extend.renderer.register('nunjucks', 'html', njkRenderer, false)
+hexo.extend.renderer.register('j2', 'html', njkRenderer, true)
+hexo.extend.renderer.register('njk', 'html', njkRenderer, true)
+hexo.extend.renderer.register('nunjucks', 'html', njkRenderer, true)

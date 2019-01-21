@@ -14,7 +14,7 @@
   "author": "MomoCow",
   "license": "MIT",
   "dependencies": {
-    "nunjucks": "^3.1.6"
+    "nunjucks": "^3.1.7"
   },
   "devDependencies": {
     "gitmoji-cli": "^1.9.2"
