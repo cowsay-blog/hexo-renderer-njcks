@@ -10,10 +10,10 @@ const nunjucksDefaults = {
 const CONFIG = Object.assign({}, nunjucksDefaults, hexo.config.nunjucks)
 
 const builtInFilters = [
-  require('./filters/cast-array'),
-  require('./filters/base-url'),
+  require('./filters/castarray'),
+  require('./filters/baseurl'),
   require('./filters/prop'),
-  require('./filters/typeOf'),
+  require('./filters/typeof'),
   require('./filters/xmlattr')
 ]
   .map(filter => ({
@@ -53,7 +53,6 @@ function njkRenderer (data, locals) {
 
 njkRenderer.compile = njkCompile
 
-/* global hexo */
 hexo.extend.renderer.register('j2', 'html', njkRenderer, true)
 hexo.extend.renderer.register('njk', 'html', njkRenderer, true)
 hexo.extend.renderer.register('nunjucks', 'html', njkRenderer, true)
