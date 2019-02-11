@@ -1,5 +1,5 @@
 {
-  "name": "hexo-renderer-nunjucks-extra",
+  "name": "hexo-renderer-njcks",
   "version": "1.0.0",
   "description": "Nunjucks renderer for Hexo with extra utilities like customizing filters, etc.",
   "main": "index.js",
