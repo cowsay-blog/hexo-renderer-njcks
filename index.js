@@ -38,12 +38,15 @@ function njkCompile (data) {
   builtInFilters.forEach(filter => installFilters(env, filter))
   const njkTemplate = nunjucks.compile(data.text, env)
   return function renderer (locals) {
-    try {
-      return njkTemplate.render(locals)
-    } catch (e) {
-      hexo.log.error(e)
-    }
-    return ''
+    return new Promise((resolve, reject) => {
+      njkTemplate.render(locals, (err, result) => {
+        if (err) {
+          hexo.log.error(err)
+          return reject(err)
+        }
+        resolve(result)
+      })
+    })
   }
 }
 
@@ -53,6 +56,6 @@ function njkRenderer (data, locals) {
 
 njkRenderer.compile = njkCompile
 
-hexo.extend.renderer.register('j2', 'html', njkRenderer, true)
-hexo.extend.renderer.register('njk', 'html', njkRenderer, true)
-hexo.extend.renderer.register('nunjucks', 'html', njkRenderer, true)
+hexo.extend.renderer.register('j2', 'html', njkRenderer, false)
+hexo.extend.renderer.register('njk', 'html', njkRenderer, false)
+hexo.extend.renderer.register('nunjucks', 'html', njkRenderer, false)
