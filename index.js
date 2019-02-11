@@ -1,4 +1,3 @@
-const { name } = require('./package.json')
 const nunjucks = require('nunjucks')
 const path = require('path')
 
@@ -7,22 +6,19 @@ const nunjucksDefaults = {
   watch: false
 }
 
-const CONFIG = Object.assign({}, nunjucksDefaults, hexo.config.nunjucks)
-
 const builtInFilters = [
-  require('./filters/castarray'),
-  require('./filters/baseurl'),
-  require('./filters/prop'),
   require('./filters/typeof'),
   require('./filters/xmlattr')
 ]
-  .map(filter => ({
+  .map(filter => typeof filter === 'function' ? ({
     name: toSnakeCase(filter.name),
     handler: filter,
     async: filter.async
+  }) : ({
+    name: toSnakeCase(filter.name || filter.fn.name),
+    handler: filter.fn,
+    async: filter.async
   }))
-
-hexo.log.info('[%s] %d filters loaded', name, builtInFilters.length)
 
 function toSnakeCase (str = '') {
   return str.replace(/[A-Z]/g, (matched) => '_' + matched.toLowerCase())
@@ -32,10 +28,31 @@ function installFilters (env, filter) {
   env.addFilter(toSnakeCase(filter.name), filter.handler, filter.async)
 }
 
+function safeGet (getter = () => ({}), defaultVal) {
+  try {
+    return getter()
+  } catch (e) {
+    return defaultVal
+  }
+}
+
 function njkCompile (data) {
+  const CONFIG = Object.assign(
+    {},
+    nunjucksDefaults,
+    safeGet(() => hexo.theme.config.nunjucks),
+    safeGet(() => hexo.config.theme_config.nunjucks),
+    safeGet(() => hexo.config.nunjucks)
+  )
+
   const templateDir = path.dirname(data.path)
-  const env = nunjucks.configure(templateDir, CONFIG)
+  let env = nunjucks.configure(templateDir, CONFIG)
   builtInFilters.forEach(filter => installFilters(env, filter))
+
+  env = hexo.execFilterSync('before_render:nunjucks', env, {
+    context: env
+  })
+
   const njkTemplate = nunjucks.compile(data.text, env)
   return function renderer (locals) {
     return new Promise((resolve, reject) => {
